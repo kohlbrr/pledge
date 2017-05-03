@@ -7,6 +7,7 @@ Promises Workshop: build the pledge.js ES6-style promise library
 function HandlerGroup(success, error) {
   this.successCb = (typeof success === 'function') ? success : null;
   this.errorCb = (typeof error === 'function') ? error : null;
+  this.downstreamPromise = new $Promise();
 }
 
 class $Promise {
@@ -51,13 +52,16 @@ class $Promise {
   };
  
   then(success, error) {
-    this._handlerGroups.push(new HandlerGroup(success, error));
+    const handlerGroup = new HandlerGroup(success, error);
+    this._handlerGroups.push(handlerGroup);
     if (this._state === 'fulfilled') this._callHandlers('fulfilled');
-    if (this._state === 'rejected') this._callHandlers('rejected')
+    if (this._state === 'rejected') this._callHandlers('rejected');
+    // return this._handlerGroups[this._handlerGroups.length-1].downstreamPromise;
+    return handlerGroup.downstreamPromise;
   };
 
   catch(error) {
-    this.then(null, error);
+    return this.then(null, error);
   };
 };
 
