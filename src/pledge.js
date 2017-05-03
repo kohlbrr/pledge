@@ -5,8 +5,8 @@ Promises Workshop: build the pledge.js ES6-style promise library
 // YOUR CODE HERE:
 
 function HandlerGroup(success, error) {
-  this.successCb = (typeof(success) === 'function') ? success : null;
-  this.errorCb = (typeof(error) === 'function') ? error : null;
+  this.successCb = (typeof success === 'function') ? success : null;
+  this.errorCb = (typeof error === 'function') ? error : null;
 }
 
 class $Promise {
@@ -15,7 +15,7 @@ class $Promise {
     this._state = 'pending';
     this._value;
     this._handlerGroups = [];
-    if(typeof(executor) === 'function') executor(this._internalResolve.bind(this),
+    if(typeof executor === 'function') executor(this._internalResolve.bind(this),
       this._internalReject.bind(this));
   };
  
@@ -23,6 +23,7 @@ class $Promise {
     if(this._state === 'pending') {
       this._value = value;
       this._state = 'fulfilled';
+      this._callHandlers();
     };
   };
 
@@ -33,12 +34,18 @@ class $Promise {
     };
   };
 
-  _callHandlers(s, e) {
-    if(this.state === 'fulfilled') this._handlerGroups[handlerGroups.length-1].successCb();
+  _callHandlers() {
+    console.log(' in our handlergroups', this._handlerGroups)
+    this._handlerGroups.forEach(handlerGroup => handlerGroup.successCb(this._value));
+    this._handlerGroups = [];
   };
  
   then(success, error) {
     this._handlerGroups.push(new HandlerGroup(success, error));
+    console.log(this);
+    // console.log(this._handlerGroups);
+    if (this._state === 'fulfilled') this._callHandlers();
+
   };
 };
 
