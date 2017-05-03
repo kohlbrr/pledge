@@ -23,7 +23,7 @@ class $Promise {
     if(this._state === 'pending') {
       this._value = value;
       this._state = 'fulfilled';
-      this._callHandlers();
+      this._callHandlers('fulfilled');
     };
   };
 
@@ -31,21 +31,33 @@ class $Promise {
     if(this._state === 'pending') {
       this._value = reason;
       this._state = 'rejected';
+      this._callHandlers('rejected');
     };
   };
 
-  _callHandlers() {
-    console.log(' in our handlergroups', this._handlerGroups)
-    this._handlerGroups.forEach(handlerGroup => handlerGroup.successCb(this._value));
+  _callHandlers(state) {
+    // Recurse through this with values
+    if(state === 'fulfilled') {
+      this._handlerGroups.forEach(handlerGroup => {
+        if(handlerGroup.successCb) handlerGroup.successCb(this._value);
+      });
+    }
+    if(state === 'rejected') {
+      this._handlerGroups.forEach(handlerGroup => {
+        if(handlerGroup.errorCb) handlerGroup.errorCb(this._value);
+      });
+    }
     this._handlerGroups = [];
   };
  
   then(success, error) {
     this._handlerGroups.push(new HandlerGroup(success, error));
-    console.log(this);
-    // console.log(this._handlerGroups);
-    if (this._state === 'fulfilled') this._callHandlers();
+    if (this._state === 'fulfilled') this._callHandlers('fulfilled');
+    if (this._state === 'rejected') this._callHandlers('rejected')
+  };
 
+  catch(error) {
+    this.then(null, error);
   };
 };
 
