@@ -39,7 +39,7 @@ describe("A promise's `.then` method", function(){
     e2 = function (/* reason */) { /* handle reason */ };
   });
 
-  xit('adds groups of handlers (callback functions) to the promise', function(){
+  it('adds groups of handlers (callback functions) to the promise', function(){
     promise.then( s1, e1 );
     expect( promise._handlerGroups[0].successCb ).toBe( s1 );
     expect( promise._handlerGroups[0].errorCb   ).toBe( e1 );
